@@ -118,6 +118,46 @@ function delete_config() {
   echo "指定配置已删除！"
 }
 
+# 修改转发配置
+function modify_config() {
+  echo "当前配置如下："
+  if [ ! -f "$CONFIG_FILE" ]; then
+    echo "配置文件不存在！"
+    return
+  fi
+
+  cat -n "$CONFIG_FILE" | grep -E "listen|remote"
+
+  echo "请输入要修改的配置编号（例如第几行的 listen 或 remote）："
+  read -p "监听行号: " LISTEN_LINE
+  read -p "远程行号: " REMOTE_LINE
+
+  if [ -z "$LISTEN_LINE" ] || [ -z "$REMOTE_LINE" ]; then
+    echo "行号不能为空！"
+    return
+  fi
+
+  echo "请输入新的监听地址 (本机 IP:端口，默认 0.0.0.0:8000):"
+  read NEW_LISTEN
+  NEW_LISTEN=${NEW_LISTEN:-0.0.0.0:8000}
+
+  echo "请输入新的远程地址 (对方 IP:端口):"
+  read NEW_REMOTE
+
+  if [ -z "$NEW_REMOTE" ]; then
+    echo "远程地址不能为空！"
+    return
+  fi
+
+  # 替换指定行的内容
+  sed -i "${LISTEN_LINE}s|.*|listen = \"$NEW_LISTEN\"|" "$CONFIG_FILE"
+  sed -i "${REMOTE_LINE}s|.*|remote = \"$NEW_REMOTE\"|" "$CONFIG_FILE"
+
+  echo "配置已更新！"
+  echo "新的监听地址：$NEW_LISTEN"
+  echo "新的远程地址：$NEW_REMOTE"
+}
+
 # 主菜单
 function show_menu() {
   echo "======================================="
@@ -125,8 +165,9 @@ function show_menu() {
   echo "2) 查看当前转发配置"
   echo "3) 添加新的转发配置"
   echo "4) 删除转发配置"
-  echo "5) 重启 realm 服务"
-  echo "6) 退出"
+  echo "5) 修改现有转发配置"
+  echo "6) 重启 realm 服务"
+  echo "7) 退出"
   echo "======================================="
 }
 
@@ -156,9 +197,12 @@ while true; do
       delete_config
       ;;
     5)
-      restart_realm
+      modify_config
       ;;
     6)
+      restart_realm
+      ;;
+    7)
       echo "退出程序！"
       break
       ;;
