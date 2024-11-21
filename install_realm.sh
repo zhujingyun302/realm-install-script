@@ -158,6 +158,16 @@ function modify_config() {
   echo "新的远程地址：$NEW_REMOTE"
 }
 
+# 查看转发状态
+function view_status() {
+  echo "当前转发服务状态："
+  systemctl status realm | grep -E "Active|PID|Tasks|Memory|CPU" || echo "realm 服务未运行！"
+
+  echo ""
+  echo "转发活动日志："
+  journalctl -u realm.service -n 10 --no-pager || echo "无法获取日志！"
+}
+
 # 主菜单
 function show_menu() {
   echo "======================================="
@@ -166,8 +176,9 @@ function show_menu() {
   echo "3) 添加新的转发配置"
   echo "4) 删除转发配置"
   echo "5) 修改现有转发配置"
-  echo "6) 重启 realm 服务"
-  echo "7) 退出"
+  echo "6) 查看转发状态"
+  echo "7) 重启 realm 服务"
+  echo "8) 退出"
   echo "======================================="
 }
 
@@ -200,9 +211,12 @@ while true; do
       modify_config
       ;;
     6)
-      restart_realm
+      view_status
       ;;
     7)
+      restart_realm
+      ;;
+    8)
       echo "退出程序！"
       break
       ;;
