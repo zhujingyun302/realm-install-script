@@ -29,6 +29,11 @@ echo "请输入本机端口："
 read -p "本机端口 (默认 8000): " LOCAL_PORT
 LOCAL_PORT=${LOCAL_PORT:-8000}
 
+# 确保 /etc/realm 目录存在
+if [ ! -d "/etc/realm" ]; then
+  mkdir -p /etc/realm
+fi
+
 # 创建 realm 配置文件
 cat > /etc/realm/config.toml <<EOF
 [[endpoints]]
